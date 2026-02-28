@@ -1,5 +1,6 @@
 [functions]
   included_files = [
+    "lib/tesseract-worker.cjs",
     "node_modules/tesseract.js/src/worker-script/**",
     "node_modules/tesseract.js-core/**",
     "eng.traineddata",

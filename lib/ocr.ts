@@ -1,7 +1,7 @@
 import { createWorker } from "tesseract.js";
 import path from "node:path";
 
-const workerPath = path.join(process.cwd(), "node_modules", "tesseract.js", "src", "worker-script", "node", "index.js");
+const workerPath = path.join(process.cwd(), "lib", "tesseract-worker.cjs");
 const langPath = process.env.TESSDATA_PREFIX || process.cwd();
 
 export async function runOcr(buffer: Buffer) {
