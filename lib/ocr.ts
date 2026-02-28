@@ -1,9 +1,7 @@
 import { createWorker } from "tesseract.js";
-import { createRequire } from "node:module";
+import path from "node:path";
 
-const require = createRequire(import.meta.url);
-
-const workerPath = require.resolve("tesseract.js/src/worker-script/node/index.js");
+const workerPath = path.join(process.cwd(), "node_modules", "tesseract.js", "src", "worker-script", "node", "index.js");
 const langPath = process.env.TESSDATA_PREFIX || process.cwd();
 
 export async function runOcr(buffer: Buffer) {
