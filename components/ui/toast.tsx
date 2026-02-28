@@ -25,7 +25,11 @@ const toastVariants = {
   success: "border bg-white text-success"
 } as const;
 
-const Toast = React.forwardRef<React.ElementRef<typeof ToastPrimitives.Root>, React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>>(
+type ToastProps = React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & {
+  variant?: keyof typeof toastVariants;
+};
+
+const Toast = React.forwardRef<React.ElementRef<typeof ToastPrimitives.Root>, ToastProps>(
   ({ className, variant = "default", ...props }, ref) => {
     return (
       <ToastPrimitives.Root
