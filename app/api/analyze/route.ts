@@ -6,6 +6,7 @@ import { historySchema } from "@/lib/schema";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const MAX_SIZE = 6 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png"];

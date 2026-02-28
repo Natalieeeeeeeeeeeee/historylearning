@@ -3,6 +3,10 @@
     "lib/tesseract-worker.cjs",
     "node_modules/tesseract.js/src/worker-script/**",
     "node_modules/tesseract.js-core/**",
+    "node_modules/node-fetch/**",
+    "node_modules/whatwg-url/**",
+    "node_modules/tr46/**",
+    "node_modules/webidl-conversions/**",
     "eng.traineddata",
     "vie.traineddata"
   ]
