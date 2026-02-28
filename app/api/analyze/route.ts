@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { runOcr } from "@/lib/ocr";
-import { generateHistoryJson } from "@/lib/llm";
+import { generateHistoryJson, generateHistoryJsonFromImages } from "@/lib/llm";
 import { historySchema } from "@/lib/schema";
 
 export const runtime = "nodejs";
@@ -39,6 +39,22 @@ export async function POST(req: NextRequest) {
     }
     if (totalSize > MAX_SIZE * files.length) {
       return NextResponse.json({ message: "Tổng dung lượng vượt quá giới hạn" }, { status: 400 });
+    }
+
+    const useDirectImageAnalysis = process.env.USE_DIRECT_IMAGE_ANALYZE !== "false";
+    if (useDirectImageAnalysis && process.env.OPENAI_API_KEY) {
+      const images = await Promise.all(
+        files.map(async (f) => {
+          const buffer = Buffer.from(await f.arrayBuffer());
+          return {
+            mimeType: f.type || "image/jpeg",
+            base64: buffer.toString("base64")
+          };
+        })
+      );
+      const data = await generateHistoryJsonFromImages(images);
+      const validated = historySchema.parse(data);
+      return NextResponse.json({ data: validated, ocrText: "" });
     }
 
     let combinedText = "";

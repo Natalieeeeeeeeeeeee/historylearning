@@ -113,6 +113,66 @@ function sanitizeJson(raw: string) {
   return raw.replace(/```json|```/g, "").trim();
 }
 
+type OcrImageInput = {
+  mimeType: string;
+  base64: string;
+};
+
+export async function generateHistoryJsonFromImages(images: OcrImageInput[]): Promise<HistoryResponse> {
+  if (!images.length) {
+    throw new Error("Thiếu ảnh để phân tích");
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  const model = process.env.OPENAI_VISION_MODEL || process.env.OPENAI_MODEL || "gpt-4o-mini";
+  if (!apiKey) throw new Error("Missing OPENAI_API_KEY");
+
+  const client = new OpenAI({ apiKey });
+  const userContent = [
+    {
+      type: "text" as const,
+      text: `
+Bạn là trợ lý Lịch sử. Đọc toàn bộ chữ trong các ảnh ghi chép và tạo JSON đúng schema dưới đây.
+- Chỉ dùng thông tin nhìn thấy trong ảnh.
+- Không bịa thêm.
+- Nếu thiếu dữ kiện, ghi "Không đủ dữ kiện từ ghi chép" trong trường details tương ứng.
+- Chỉ trả JSON thuần, không markdown.
+
+Schema cố định:
+${schemaText}
+`
+    },
+    ...images.map((img) => ({
+      type: "image_url" as const,
+      image_url: { url: `data:${img.mimeType};base64,${img.base64}` }
+    }))
+  ];
+
+  const res = await client.chat.completions.create({
+    model,
+    messages: [
+      { role: "system", content: "Bạn tạo JSON Lịch sử đúng schema. Không giải thích." },
+      { role: "user", content: userContent as any }
+    ],
+    temperature: 0.2,
+    response_format: { type: "json_object" }
+  });
+
+  const raw = res.choices[0]?.message?.content ?? "";
+  const cleaned = sanitizeJson(raw);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    throw new Error("LLM trả về dữ liệu không phải JSON hợp lệ");
+  }
+  const result = historySchema.safeParse(parsed);
+  if (!result.success) {
+    throw new Error("JSON không đúng schema: " + result.error.errors.map((e) => e.message).join("; "));
+  }
+  return result.data;
+}
+
 export async function generateHistoryJson(ocrText: string): Promise<HistoryResponse> {
   const provider = getProvider();
   const prompt = basePrompt(ocrText);
