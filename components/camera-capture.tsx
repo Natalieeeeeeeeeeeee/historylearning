@@ -92,7 +92,7 @@ export function CameraCapture({ onCapture }: Props) {
           </Button>
         )}
         <label className="cursor-pointer">
-          <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleUpload} />
+          <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
           <div className="inline-flex h-10 items-center rounded-md border border-input bg-white px-4 text-sm font-medium shadow-sm">
             Tải ảnh từ máy
           </div>
